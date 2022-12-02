@@ -16,7 +16,6 @@ import os
 # In[14]:
 
 
-credentials = service_account.Credentials.from_service_account_file(private_key.json, scopes=["https://www.googleapis.com/auth/cloud-platform"],)
 
-client = bigquery.Client(credentials=credentials, project=credentials.project_id,)
+client = bigquery.Client(credentials=credentials_json, project=credentials.project_id,)
 
