@@ -10,8 +10,8 @@ import datetime
 import flatten_json as fj
 
 
-user_name = os.environ['USER_NAME']
-github_token = os.environ['API_TOKEN']
+user_name = os.environ['user_name']
+github_token = os.environ['github_token']
 
 #creating a authenticated session
 gh_session = requests.Session()
