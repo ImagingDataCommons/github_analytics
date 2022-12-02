@@ -1,6 +1,7 @@
 #!pip install pygithub google-cloud-secret-manager flatten_json
 # Install the module and import it :
 #!pip install google-cloud-secret-manager
+import os
 import requests
 #from getpass import getpass
 import pandas as pd
