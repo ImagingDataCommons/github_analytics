@@ -17,5 +17,5 @@ import os
 
 
 
-client = bigquery.Client(credentials=credentials_json, project=credentials.project_id,)
+client = bigquery.Client()
 
