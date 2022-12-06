@@ -66,7 +66,7 @@ for repo in repos_list:
       star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
       print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
       break
-     except:
+    except:
        print(str(datetime.now())+' '+repo+' ' +'attempt to retreive stargazers was unsuccessful, check for errors while converting json response to dataframe/n') 
        print('retrying')
        continue
