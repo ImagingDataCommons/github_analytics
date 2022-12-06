@@ -19,6 +19,7 @@ github_token = os.environ['github_token']
 #creating a authenticated session
 gh_session = requests.Session()
 gh_session.auth = (user_name, github_token)
+client = bigquery.Client()
 
 clone_count_df_appended=pd.DataFrame()
 view_count_df_appended=pd.DataFrame()
@@ -44,7 +45,7 @@ for repo in repos_list:
   #stargazers
   for i in range(0,50):
     #try:
-      repo='IDC-WebApp'
+      #repo='IDC-WebApp'
       #get request for list of people that have starred the repository
       #documentation:https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#list-stargazers
       star_gazers_get_request='https://api.github.com/repos/ImagingDataCommons/'+repo+'/stargazers'
@@ -64,21 +65,21 @@ for repo in repos_list:
       star_gazers_df=star_gazers_df[['login', 'html_url','type', 'site_admin', 'repo','timestamp_data_pulled']]
       star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
       print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
-  #    break
-  #   except:
-  #     print(str(datetime.now())+' '+repo+' ' +'attempt to retreive stargazers was unsuccessful, check for errors while converting json response to dataframe/n') 
-  #     print('retrying')
-  #     continue
+      break
+     except:
+       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive stargazers was unsuccessful, check for errors while converting json response to dataframe/n') 
+       print('retrying')
+       continue
 
-  # for i in range(0,5):
-  #   try:
-  #     #not setting schema as there are many columns
-  #     #star_gazers_df_job_config = []
-  #     #loading into bq
-  #     star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers") 
-  #     print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
-  #     break
-  #   except:
-  #     print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
-  #     print('retrying to load into bigquery')
-  #     continue
+   for i in range(0,5):
+     try:
+       #not setting schema as there are many columns
+       #star_gazers_df_job_config = []
+       #loading into bq
+       star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers") 
+       print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
+       break
+     except:
+       print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
+       print('retrying to load into bigquery')
+       continue
