@@ -44,7 +44,7 @@ for repo in repos_list:
   #Clones_traffic
   #stargazers
   for i in range(0,50):
-    #try:
+    try:
       #repo='IDC-WebApp'
       #get request for list of people that have starred the repository
       #documentation:https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#list-stargazers
