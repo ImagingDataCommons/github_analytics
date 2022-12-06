@@ -19,6 +19,7 @@ github_token = os.environ['github_token']
 #creating a authenticated session
 gh_session = requests.Session()
 gh_session.auth = (user_name, github_token)
+client = bigquery.Client()
 
 clone_count_df_appended=pd.DataFrame()
 view_count_df_appended=pd.DataFrame()
