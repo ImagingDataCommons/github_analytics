@@ -40,7 +40,7 @@ repos_df=pd.DataFrame.from_dict(repos_get_request_json)
 repos_list=repos_df['name'].tolist()
 repos_list
 
-for repo in ['IDC-WebApp']:
+for repo in repos_list:
   #Clones_traffic
   for i in range(0,50):
     try:
