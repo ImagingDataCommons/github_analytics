@@ -7,7 +7,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  greet:
+  github-etl:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -19,7 +19,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install requests pandas flatten_json google-cloud-bigquery
-    - name: Run github etl script
+        
+    - name: Authorize google cloud 
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: '${{ secrets.PRIVATE_KEY }}'
+    - name: Run github etl script        
       env:
         user_name: ${{ secrets.USER_NAME }}
         github_token: ${{ secrets.API_TOKEN }}
