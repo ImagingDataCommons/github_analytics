@@ -1,13 +1,16 @@
 #!pip install pygithub google-cloud-secret-manager flatten_json
 # Install the module and import it :
 #!pip install google-cloud-secret-manager
-import os
 import requests
-#from getpass import getpass
+from getpass import getpass
 import pandas as pd
 import json
-import datetime
 import flatten_json as fj
+from google.cloud import bigquery
+from google.oauth2 import service_account
+import os
+from datetime import datetime,timedelta
+import calendar
 
 
 user_name = os.environ['user_name']
