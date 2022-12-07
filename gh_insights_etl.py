@@ -82,25 +82,26 @@ for repo in repos_list:
       print('retrying')
       continue
 
-    for i in range(0,5):
-      try:
-         #setting schema
-          clone_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("timestamp", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                     bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
-                                                     bigquery.SchemaField("clone_count", bigquery.enums.SqlTypeNames.INT64),
-                                                     bigquery.SchemaField("unique_clone_count", bigquery.enums.SqlTypeNames.INT64),
-                                                     bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                     ])
-         #loading into bq
-          clone_count_df_job = client.load_table_from_dataframe(clone_count_df_appended, "idc-external-025.logs.gh_clone_count", job_config=clone_count_df_job_config)
-          print('successfully loaded data from clone_count_df_appended dataframe to bigquery')
-          break
-      except:
-          print('loading data from clone_count_df_appended dataframe to bigquery was unsuccessful/n')
-          print('retrying to load into bigquery')
-          continue
+for i in range(0,5):
+  try:
+     #setting schema
+      clone_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("timestamp", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                 bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
+                                                 bigquery.SchemaField("clone_count", bigquery.enums.SqlTypeNames.INT64),
+                                                 bigquery.SchemaField("unique_clone_count", bigquery.enums.SqlTypeNames.INT64),
+                                                 bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                 ])
+     #loading into bq
+      clone_count_df_job = client.load_table_from_dataframe(clone_count_df_appended, "idc-external-025.logs.gh_clone_count", job_config=clone_count_df_job_config)
+      print('successfully loaded data from clone_count_df_appended dataframe to bigquery')
+      break
+  except:
+      print('loading data from clone_count_df_appended dataframe to bigquery was unsuccessful/n')
+      print('retrying to load into bigquery')
+      continue
 
 #Views_traffic
+for repo in repos_list:
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -135,26 +136,27 @@ for repo in repos_list:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive views traffic was unsuccessful, check for errors while converting json response to dataframe/n')
       print('retrying')
       continue
-    for i in range(0,5):
-      try:
-        #setting schema
-        view_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("timestamp", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                    bigquery.SchemaField("views_count", bigquery.enums.SqlTypeNames.INT64),
-                                                    bigquery.SchemaField("unique_view_count", bigquery.enums.SqlTypeNames.INT64),
-                                                    bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
-                                                    bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                    ])
-        #loading into bq
-        view_count_df_job = client.load_table_from_dataframe(view_count_df_appended, "idc-external-025.logs.gh_views_traffic", job_config=view_count_df_job_config)
-        print('successfully loaded data from view_count_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from view_count_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue
+for i in range(0,5):
+  try:
+    #setting schema
+    view_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("timestamp", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                bigquery.SchemaField("views_count", bigquery.enums.SqlTypeNames.INT64),
+                                                bigquery.SchemaField("unique_view_count", bigquery.enums.SqlTypeNames.INT64),
+                                                bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
+                                                bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                ])
+    #loading into bq
+    view_count_df_job = client.load_table_from_dataframe(view_count_df_appended, "idc-external-025.logs.gh_views_traffic", job_config=view_count_df_job_config)
+    print('successfully loaded data from view_count_df_appended dataframe to bigquery')
+    break
+  except:
+    print('loading data from view_count_df_appended dataframe to bigquery was unsuccessful/n')
+    print('retrying to load into bigquery')
+    continue
 
       
 #referrers
+for repo in repos_list:
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -186,26 +188,27 @@ for repo in repos_list:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive top 10 referrers in the last 14 days was unsuccessful, check for errors while converting json response to dataframe/n')
       print('retrying')
       continue
-    for i in range(0,5):
-      try:
-        #setting schema
-        top_referrers_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("referrer", bigquery.enums.SqlTypeNames.STRING),
-                                                    bigquery.SchemaField("referrer_count_all", bigquery.enums.SqlTypeNames.INT64),
-                                                    bigquery.SchemaField("referrer_count_unique", bigquery.enums.SqlTypeNames.INT64),
-                                                    bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
-                                                    bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                    ])
-        #loading into bq
-        top_referrers_df_job = client.load_table_from_dataframe(top_referrers_df_appended, "idc-external-025.logs.gh_top_referrers", job_config=top_referrers_df_job_config)
-        print('successfully loaded data from top_referrers_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from top_referrers_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue
+for i in range(0,5):
+  try:
+    #setting schema
+    top_referrers_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("referrer", bigquery.enums.SqlTypeNames.STRING),
+                                                bigquery.SchemaField("referrer_count_all", bigquery.enums.SqlTypeNames.INT64),
+                                                bigquery.SchemaField("referrer_count_unique", bigquery.enums.SqlTypeNames.INT64),
+                                                bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
+                                                bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                ])
+    #loading into bq
+    top_referrers_df_job = client.load_table_from_dataframe(top_referrers_df_appended, "idc-external-025.logs.gh_top_referrers", job_config=top_referrers_df_job_config)
+    print('successfully loaded data from top_referrers_df_appended dataframe to bigquery')
+    break
+  except:
+    print('loading data from top_referrers_df_appended dataframe to bigquery was unsuccessful/n')
+    print('retrying to load into bigquery')
+    continue
 
 
 #paths
+for repo in repos_list:
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -237,26 +240,27 @@ for repo in repos_list:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive top 10 paths in the last 14 days was unsuccessful, check for errors while converting json response to dataframe/n')
       print('retrying')
       continue
-    for i in range(0,5):
-      try:
-        #setting schema
-        top_paths_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("path", bigquery.enums.SqlTypeNames.STRING),
-                                                    bigquery.SchemaField("title", bigquery.enums.SqlTypeNames.STRING),
-                                                    bigquery.SchemaField("paths_count_all", bigquery.enums.SqlTypeNames.INT64),
-                                                    bigquery.SchemaField("paths_count_unique", bigquery.enums.SqlTypeNames.INT64),
-                                                    bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
-                                                    bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                    ])
-        #loading into bq
-        top_paths_df_job = client.load_table_from_dataframe(top_paths_df_appended, "idc-external-025.logs.gh_top_paths", job_config=top_paths_df_job_config)
-        print('successfully loaded data from top_paths_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from top_paths_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue      
+for i in range(0,5):
+  try:
+    #setting schema
+    top_paths_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("path", bigquery.enums.SqlTypeNames.STRING),
+                                                bigquery.SchemaField("title", bigquery.enums.SqlTypeNames.STRING),
+                                                bigquery.SchemaField("paths_count_all", bigquery.enums.SqlTypeNames.INT64),
+                                                bigquery.SchemaField("paths_count_unique", bigquery.enums.SqlTypeNames.INT64),
+                                                bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
+                                                bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                ])
+    #loading into bq
+    top_paths_df_job = client.load_table_from_dataframe(top_paths_df_appended, "idc-external-025.logs.gh_top_paths", job_config=top_paths_df_job_config)
+    print('successfully loaded data from top_paths_df_appended dataframe to bigquery')
+    break
+  except:
+    print('loading data from top_paths_df_appended dataframe to bigquery was unsuccessful/n')
+    print('retrying to load into bigquery')
+    continue      
 
   #stargazers
+for repo in repos_list:
   for i in range(0,50):
     try:
       #repo='ai_medima_misc '
@@ -289,20 +293,21 @@ for repo in repos_list:
       print('retrying')
       continue
 
-    for i in range(0,5):
-      try:
-        #not setting schema as there are many columns
-        #star_gazers_df_job_config = []
-        #loading into bq
-        star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers") 
-        print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue
+for i in range(0,5):
+  try:
+    #not setting schema as there are many columns
+    #star_gazers_df_job_config = []
+    #loading into bq
+    star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers") 
+    print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
+    break
+  except:
+    print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
+    print('retrying to load into bigquery')
+    continue
 
 #subscribers
+for repo in repos_list:
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -335,20 +340,21 @@ for repo in repos_list:
       print('retrying')
       continue
       
-    for i in range(0,5):
-      try:
-        #not setting schema as there are many columns
-        #loading into bq
-        subscribers_df_job = client.load_table_from_dataframe(subscribers_df_appended, "idc-external-025.logs.gh_subscribers") 
-        print('successfully loaded data from subscribers_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from subscribers_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue
+for i in range(0,5):
+  try:
+    #not setting schema as there are many columns
+    #loading into bq
+    subscribers_df_job = client.load_table_from_dataframe(subscribers_df_appended, "idc-external-025.logs.gh_subscribers") 
+    print('successfully loaded data from subscribers_df_appended dataframe to bigquery')
+    break
+  except:
+    print('loading data from subscribers_df_appended dataframe to bigquery was unsuccessful/n')
+    print('retrying to load into bigquery')
+    continue
 
 
 #contributor_commit_activity
+for repo in repos_list:
   if findDay(now)== 'Wednesday':
     latest_week_sunday=(datetime.now()- timedelta(days=3)).strftime("%Y-%m-%d")
 
@@ -390,21 +396,22 @@ for repo in repos_list:
         print('retrying')
         continue
 
-    for i in range(0,5):
-      try:
-        #not setting schema as there are many columns
-        #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+for i in range(0,5):
+  try:
+    #not setting schema as there are many columns
+    #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
 
-        #loading into bq
-        contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity") 
-        print('successfully loaded data from contributor_commit_activity_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue
+    #loading into bq
+    contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity") 
+    print('successfully loaded data from contributor_commit_activity_df_appended dataframe to bigquery')
+    break
+  except:
+    print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n')
+    print('retrying to load into bigquery')
+    continue
 
 #list_repository_languages
+for repo in repos_list:
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -432,22 +439,23 @@ for repo in repos_list:
       print('retrying')
       continue
 
-    for i in range(0,5):
-      try:
-        #not setting schema as there are many columns
-        #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+for i in range(0,5):
+  try:
+    #not setting schema as there are many columns
+    #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
 
-        #loading into bq
-        list_repository_languages_df_appended.columns = list_repository_languages_df_appended.columns.str.replace(r" ", "_", regex=True)
-        list_repository_languages_df_job = client.load_table_from_dataframe(list_repository_languages_df_appended, "idc-external-025.logs.gh_repository_languages") 
-        print('successfully loaded data from list_repository_languages_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from list_repository_languages_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue
+    #loading into bq
+    list_repository_languages_df_appended.columns = list_repository_languages_df_appended.columns.str.replace(r" ", "_", regex=True)
+    list_repository_languages_df_job = client.load_table_from_dataframe(list_repository_languages_df_appended, "idc-external-025.logs.gh_repository_languages") 
+    print('successfully loaded data from list_repository_languages_df_appended dataframe to bigquery')
+    break
+  except:
+    print('loading data from list_repository_languages_df_appended dataframe to bigquery was unsuccessful/n')
+    print('retrying to load into bigquery')
+    continue
 
 #forks
+for repo in repos_list:
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -483,16 +491,16 @@ for repo in repos_list:
       print('retrying')
       continue
 
-    for i in range(0,5):
-      try:
-        #not setting schema as there are many columns
-        #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+for i in range(0,5):
+  try:
+    #not setting schema as there are many columns
+    #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
 
-        #loading into bq
-        forks_df_job = client.load_table_from_dataframe(forks_df_appended, "idc-external-025.logs.gh_forks") 
-        print('successfully loaded data from forks_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from forks_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue
+    #loading into bq
+    forks_df_job = client.load_table_from_dataframe(forks_df_appended, "idc-external-025.logs.gh_forks") 
+    print('successfully loaded data from forks_df_appended dataframe to bigquery')
+    break
+  except:
+    print('loading data from forks_df_appended dataframe to bigquery was unsuccessful/n')
+    print('retrying to load into bigquery')
+    continue
