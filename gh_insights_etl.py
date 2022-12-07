@@ -31,6 +31,11 @@ contributor_commit_activity_df_appended=pd.DataFrame()
 list_repository_languages_df_appended=pd.DataFrame()
 forks_df_appended=pd.DataFrame()
 
+def findDay(date):
+    x = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ').weekday()
+    return (calendar.day_name[x])
+now=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
 
 #repos
 #catches everything
@@ -41,7 +46,7 @@ repos_list=repos_df['name'].tolist()
 repos_list
 
 for repo in repos_list:
-  #Clones_traffic
+#clones_traffic  
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -60,37 +65,41 @@ for repo in repos_list:
       #adding a column to indicate the repo_name,adding timestamp, and renaming columns, converting timestamp to datetime64
       clone_count_df['repo']=repo
       clone_count_df['timestamp_data_pulled'] = pd.to_datetime('today')
-      clone_count_df=clone_count_df.rename(columns={'count':'clone_count', 'uniques':'unique_clone_count'})
-      clone_count_df['timestamp']= pd.to_datetime(clone_count_df['timestamp']).dt.tz_localize(None)
-      #getting clone counts only from the day before
-      #clone_count_df=clone_count_df[clone_count_df['timestamp']==(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")]
-      print(str(datetime.now())+' '+repo+' ' +'successfully retreived clone counts into clone_count_df')
-      clone_count_df_appended=pd.concat([clone_count_df_appended,clone_count_df])
-      break
+      if 'count' in clone_count_df.columns:
+        clone_count_df=clone_count_df.rename(columns={'count':'clone_count', 'uniques':'unique_clone_count'})
+        clone_count_df['timestamp']= pd.to_datetime(clone_count_df['timestamp']).dt.tz_localize(None)
+        #getting clone counts only from the day before
+        #clone_count_df=clone_count_df[clone_count_df['timestamp']==(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")]
+        print(str(datetime.now())+' '+repo+' ' +'successfully retreived clone counts into clone_count_df')
+        clone_count_df_appended=pd.concat([clone_count_df_appended,clone_count_df])
+        break
+        for i in range(0,5):
+          try:
+            #setting schema
+            clone_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("timestamp", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                        bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
+                                                        bigquery.SchemaField("clone_count", bigquery.enums.SqlTypeNames.INT64),
+                                                        bigquery.SchemaField("unique_clone_count", bigquery.enums.SqlTypeNames.INT64),
+                                                        bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                        ])
+            #loading into bq
+            clone_count_df_job = client.load_table_from_dataframe(clone_count_df_appended, "idc-external-025.logs.gh_clone_count", job_config=clone_count_df_job_config)
+            print('successfully loaded data from clone_count_df_appended dataframe to bigquery')
+            break
+          except:
+            print('loading data from clone_count_df_appended dataframe to bigquery was unsuccessful/n')
+            print('retrying to load into bigquery')
+            continue
+      else:
+        print('skipped converting api response to dataframe')
+        break
+      break     
+
     except:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive clone traffic was unsuccessful, check for errors while converting json response to dataframe/n')
       print('retrying')
       continue
-
-  for i in range(0,5):
-    try:
-      #setting schema
-      clone_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("timestamp", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                  bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
-                                                  bigquery.SchemaField("clone_count", bigquery.enums.SqlTypeNames.INT64),
-                                                  bigquery.SchemaField("unique_clone_count", bigquery.enums.SqlTypeNames.INT64),
-                                                  bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                  ])
-      #loading into bq
-      clone_count_df_job = client.load_table_from_dataframe(clone_count_df_appended, "idc-external-025.logs.gh_clone_count", job_config=clone_count_df_job_config)
-      print('successfully loaded data from clone_count_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from clone_count_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
-
-  #Views_traffic
+#Views_traffic
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -109,38 +118,41 @@ for repo in repos_list:
       #adding a column to indicate the repo_name, timestamp, and renaming columns
       view_count_df['repo']=repo
       view_count_df['timestamp_data_pulled'] = pd.to_datetime('today')
-      view_count_df=view_count_df.rename(columns={'count':'views_count', 'uniques':'unique_view_count'})
-      view_count_df['timestamp']= pd.to_datetime(view_count_df['timestamp']).dt.tz_localize(None)
-      #getting view counts only from the day before
-      #view_count_df=view_count_df[view_count_df['timestamp']==(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")]
-      view_count_df_appended=pd.concat([view_count_df_appended,view_count_df])
-      print(str(datetime.now())+' '+repo+' ' +'successfully retreived view counts into view_count_df')
+      if 'count' in view_count_df.columns:
+        view_count_df=view_count_df.rename(columns={'count':'views_count', 'uniques':'unique_view_count'})
+        view_count_df['timestamp']= pd.to_datetime(view_count_df['timestamp']).dt.tz_localize(None)
+        #getting view counts only from the day before
+        #view_count_df=view_count_df[view_count_df['timestamp']==(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")]
+        view_count_df_appended=pd.concat([view_count_df_appended,view_count_df])
+        print(str(datetime.now())+' '+repo+' ' +'successfully retreived view counts into view_count_df')
+        break
+        for i in range(0,5):
+          try:
+            #setting schema
+            view_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("timestamp", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                        bigquery.SchemaField("views_count", bigquery.enums.SqlTypeNames.INT64),
+                                                        bigquery.SchemaField("unique_view_count", bigquery.enums.SqlTypeNames.INT64),
+                                                        bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
+                                                        bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                        ])
+            #loading into bq
+            view_count_df_job = client.load_table_from_dataframe(view_count_df_appended, "idc-external-025.logs.gh_views_traffic", job_config=view_count_df_job_config)
+            print('successfully loaded data from view_count_df_appended dataframe to bigquery')
+            break
+          except:
+            print('loading data from view_count_df_appended dataframe to bigquery was unsuccessful/n')
+            print('retrying to load into bigquery')
+            continue
+      else:
+          print('skipped converting api response to dataframe')
+          break
       break
     except:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive views traffic was unsuccessful, check for errors while converting json response to dataframe/n')
       print('retrying')
       continue
-
-  for i in range(0,5):
-    try:
-      #setting schema
-      view_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("timestamp", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                  bigquery.SchemaField("views_count", bigquery.enums.SqlTypeNames.INT64),
-                                                  bigquery.SchemaField("unique_view_count", bigquery.enums.SqlTypeNames.INT64),
-                                                  bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
-                                                  bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                  ])
-      #loading into bq
-      view_count_df_job = client.load_table_from_dataframe(view_count_df_appended, "idc-external-025.logs.gh_views_traffic", job_config=view_count_df_job_config)
-      print('successfully loaded data from view_count_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from view_count_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
-
-
-  #referrers
+      
+#referrers
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -159,35 +171,36 @@ for repo in repos_list:
       #adding a column to indicate the repo_name, timestamp, and renaming columns
       top_referrers_df['repo']=repo
       top_referrers_df['timestamp_data_pulled'] = pd.to_datetime('today')
-      top_referrers_df=top_referrers_df.rename(columns={'count':'referrer_count_all', 'uniques':'referrer_count_unique'})
-      top_referrers_df_appended=pd.concat([top_referrers_df_appended,top_referrers_df])
-      print(str(datetime.now())+' '+repo+' ' +'successfully retreived top 10 referrers in the last 14 days into top_referrers_df')
-      break
+      if 'count' in top_referrers_df.columns:
+        top_referrers_df=top_referrers_df.rename(columns={'count':'referrer_count_all', 'uniques':'referrer_count_unique'})
+        top_referrers_df_appended=pd.concat([top_referrers_df_appended,top_referrers_df])
+        print(str(datetime.now())+' '+repo+' ' +'successfully retreived top 10 referrers in the last 14 days into top_referrers_df')
+        break
+        for i in range(0,5):
+          try:
+            #setting schema
+            top_referrers_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("referrer", bigquery.enums.SqlTypeNames.STRING),
+                                                        bigquery.SchemaField("referrer_count_all", bigquery.enums.SqlTypeNames.INT64),
+                                                        bigquery.SchemaField("referrer_count_unique", bigquery.enums.SqlTypeNames.INT64),
+                                                        bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
+                                                        bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                        ])
+            #loading into bq
+            top_referrers_df_job = client.load_table_from_dataframe(top_referrers_df_appended, "idc-external-025.logs.gh_top_referrers", job_config=top_referrers_df_job_config)
+            print('successfully loaded data from top_referrers_df_appended dataframe to bigquery')
+            break
+          except:
+            print('loading data from top_referrers_df_appended dataframe to bigquery was unsuccessful/n')
+            print('retrying to load into bigquery')
+            continue
+      else:
+        print('skipped converting api response to dataframe')
+        break
+      break      
     except:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive top 10 referrers in the last 14 days was unsuccessful, check for errors while converting json response to dataframe/n')
       print('retrying')
-      continue
-
-  for i in range(0,5):
-    try:
-      #setting schema
-      top_referrers_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("referrer", bigquery.enums.SqlTypeNames.STRING),
-                                                  bigquery.SchemaField("referrer_count_all", bigquery.enums.SqlTypeNames.INT64),
-                                                  bigquery.SchemaField("referrer_count_unique", bigquery.enums.SqlTypeNames.INT64),
-                                                  bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
-                                                  bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                  ])
-      #loading into bq
-      top_referrers_df_job = client.load_table_from_dataframe(top_referrers_df_appended, "idc-external-025.logs.gh_top_referrers", job_config=top_referrers_df_job_config)
-      print('successfully loaded data from top_referrers_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from top_referrers_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
-
-
-  #paths
+#paths
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -206,39 +219,42 @@ for repo in repos_list:
       #adding a column to indicate the repo_name,timestamp, and renaming columns
       top_paths_df['repo']=repo
       top_paths_df['timestamp_data_pulled'] = pd.to_datetime('today')
-      top_paths_df=top_paths_df.rename(columns={'count':'paths_count_all', 'uniques':'paths_count_unique'})
-      top_paths_df_appended=pd.concat([top_paths_df_appended,top_paths_df])
-      print(str(datetime.now())+' '+repo+' ' +'successfully retreived top 10 paths in the last 14 days into top_paths_df')
-      break
+      if 'count' in top_paths_df.columns:
+        top_paths_df=top_paths_df.rename(columns={'count':'paths_count_all', 'uniques':'paths_count_unique'})
+        top_paths_df_appended=pd.concat([top_paths_df_appended,top_paths_df])
+        print(str(datetime.now())+' '+repo+' ' +'successfully retreived top 10 paths in the last 14 days into top_paths_df')
+        break
+        for i in range(0,5):
+          try:
+            #setting schema
+            top_paths_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("path", bigquery.enums.SqlTypeNames.STRING),
+                                                        bigquery.SchemaField("title", bigquery.enums.SqlTypeNames.STRING),
+                                                        bigquery.SchemaField("paths_count_all", bigquery.enums.SqlTypeNames.INT64),
+                                                        bigquery.SchemaField("paths_count_unique", bigquery.enums.SqlTypeNames.INT64),
+                                                        bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
+                                                        bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                                        ])
+            #loading into bq
+            top_paths_df_job = client.load_table_from_dataframe(top_paths_df_appended, "idc-external-025.logs.gh_top_paths", job_config=top_paths_df_job_config)
+            print('successfully loaded data from top_paths_df_appended dataframe to bigquery')
+            break
+          except:
+            print('loading data from top_paths_df_appended dataframe to bigquery was unsuccessful/n')
+            print('retrying to load into bigquery')
+            continue
+      else:
+        print('skipped converting api response to dataframe')
+        break
+      break          
     except:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive top 10 paths in the last 14 days was unsuccessful, check for errors while converting json response to dataframe/n')
       print('retrying')
       continue
 
-
-  for i in range(0,5):
-    try:
-      #setting schema
-      top_paths_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("path", bigquery.enums.SqlTypeNames.STRING),
-                                                  bigquery.SchemaField("title", bigquery.enums.SqlTypeNames.STRING),
-                                                  bigquery.SchemaField("paths_count_all", bigquery.enums.SqlTypeNames.INT64),
-                                                  bigquery.SchemaField("paths_count_unique", bigquery.enums.SqlTypeNames.INT64),
-                                                  bigquery.SchemaField("repo", bigquery.enums.SqlTypeNames.STRING),
-                                                  bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
-                                                  ])
-      #loading into bq
-      top_paths_df_job = client.load_table_from_dataframe(top_paths_df_appended, "idc-external-025.logs.gh_top_paths", job_config=top_paths_df_job_config)
-      print('successfully loaded data from top_paths_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from top_paths_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
-
   #stargazers
   for i in range(0,50):
     try:
-      #repo='IDC-WebApp'
+      #repo='ai_medima_misc '
       #get request for list of people that have starred the repository
       #documentation:https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#list-stargazers
       star_gazers_get_request='https://api.github.com/repos/ImagingDataCommons/'+repo+'/stargazers'
@@ -255,29 +271,32 @@ for repo in repos_list:
       star_gazers_df['repo']=repo
       star_gazers_df['timestamp_data_pulled'] = pd.to_datetime('today')
       #selecting only a few columns
-      star_gazers_df=star_gazers_df[['login', 'html_url','type', 'site_admin', 'repo','timestamp_data_pulled']]
-      star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
-      print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
+      if 'login' in star_gazers_df.columns:
+        star_gazers_df=star_gazers_df[['login', 'html_url','type', 'site_admin', 'repo','timestamp_data_pulled']]
+        star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
+        print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
+        for i in range(0,5):
+          try:
+            #not setting schema as there are many columns
+            #star_gazers_df_job_config = []
+            #loading into bq
+            star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers") 
+            print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
+            break
+          except:
+            print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
+            print('retrying to load into bigquery')
+            continue
+      else:
+        print('skipped converting api response to dataframe')
+        break
       break
     except:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive stargazers was unsuccessful, check for errors while converting json response to dataframe/n') 
       print('retrying')
       continue
-
-  for i in range(0,5):
-    try:
-      #not setting schema as there are many columns
-      #star_gazers_df_job_config = []
-      #loading into bq
-      star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers") 
-      print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
-
-  #subscribers
+      
+#subscribers
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -297,33 +316,32 @@ for repo in repos_list:
       subscribers_df['repo']=repo
       subscribers_df['timestamp_data_pulled'] = pd.to_datetime('today')
       #selecting only a few columns
-      subscribers_df=subscribers_df[['login', 'html_url','type', 'site_admin', 'repo','timestamp_data_pulled']]
-      subscribers_df_appended=pd.concat([subscribers_df_appended,subscribers_df])
-      print(str(datetime.now())+' '+repo+' ' +'successfully retreived  list of subscribers into subscribers_df')
-      break
+      if 'login' in subscribers_df.columns:
+        subscribers_df=subscribers_df[['login', 'html_url','type', 'site_admin', 'repo','timestamp_data_pulled']]
+        subscribers_df_appended=pd.concat([subscribers_df_appended,subscribers_df])
+        print(str(datetime.now())+' '+repo+' ' +'successfully retreived  list of subscribers into subscribers_df')
+        for i in range(0,5):
+          try:
+            #not setting schema as there are many columns
+            #loading into bq
+            subscribers_df_job = client.load_table_from_dataframe(subscribers_df_appended, "idc-external-025.logs.gh_subscribers") 
+            print('successfully loaded data from subscribers_df_appended dataframe to bigquery')
+            break
+          except:
+            print('loading data from subscribers_df_appended dataframe to bigquery was unsuccessful/n')
+            print('retrying to load into bigquery')
+            continue
+      else:
+        print('skipped converting api response to dataframe')
+        break
+      break    
     except:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive subscribers was unsuccessful, check for errors while converting json response to dataframe/n') 
       print('retrying')
       continue
 
-  for i in range(0,5):
-    try:
-      #not setting schema as there are many columns
-      #loading into bq
-      subscribers_df_job = client.load_table_from_dataframe(subscribers_df_appended, "idc-external-025.logs.gh_subscribers") 
-      print('successfully loaded data from subscribers_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from subscribers_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
 
-  #contributor_commit_activity
-  def findDay(date):
-      x = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ').weekday()
-      return (calendar.day_name[x])
-  now=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-
+#contributor_commit_activity
   if findDay(now)== 'Monday':
     latest_week_sunday=(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")
 
@@ -351,31 +369,35 @@ for repo in repos_list:
         contributor_commit_activity_df['w']=contributor_commit_activity_df['w'].apply(pd.to_datetime, unit = 's')
         #adding timestamp of when the data was pulled
         contributor_commit_activity_df['timestamp_data_pulled'] = pd.to_datetime('today')
-        contributor_commit_activity_df=contributor_commit_activity_df[['w', 'a', 'd', 'c', 'login', 'html_url', 'type', 'site_admin','timestamp_data_pulled']]
-        contributor_commit_activity_df=contributor_commit_activity_df[contributor_commit_activity_df['w']==latest_week_sunday]
-        contributor_commit_activity_df_appended=pd.concat([contributor_commit_activity_df_appended,contributor_commit_activity_df])
-        print(str(datetime.now())+' '+repo+' ' +'successfully retreived all contributor commit activity into contributor_commit_activity_df')
-        break 
+        if 'login' in contributor_commit_activity_df.columns:
+          contributor_commit_activity_df=contributor_commit_activity_df[['w', 'a', 'd', 'c', 'login', 'html_url', 'type', 'site_admin','timestamp_data_pulled']]
+          contributor_commit_activity_df=contributor_commit_activity_df[contributor_commit_activity_df['w']==latest_week_sunday]
+          contributor_commit_activity_df_appended=pd.concat([contributor_commit_activity_df_appended,contributor_commit_activity_df])
+          print(str(datetime.now())+' '+repo+' ' +'successfully retreived all contributor commit activity into contributor_commit_activity_df')
+          for i in range(0,5):
+            try:
+              #not setting schema as there are many columns
+              #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+                                                        
+              #loading into bq
+              contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity") 
+              print('successfully loaded data from contributor_commit_activity_df_appended dataframe to bigquery')
+              break
+            except:
+              print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n')
+              print('retrying to load into bigquery')
+              continue
+        else:
+          print('skipped converting api response to dataframe')
+          break
+        break    
       except:
         print(str(datetime.now())+' '+repo+' ' +'attempt to retreive all contributor commit activity was unsuccessful, check for errors while converting json response to dataframe/n')
         print('retrying')
         continue
 
-    for i in range(0,5):
-      try:
-        #not setting schema as there are many columns
-        #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
 
-        #loading into bq
-        contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity") 
-        print('successfully loaded data from contributor_commit_activity_df_appended dataframe to bigquery')
-        break
-      except:
-        print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n')
-        print('retrying to load into bigquery')
-        continue
-
-  #list_repository_languages
+#list_repository_languages
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -418,7 +440,7 @@ for repo in repos_list:
       print('retrying to load into bigquery')
       continue
 
-  #forks
+#forks
   for i in range(0,50):
     try:
       #repo='IDC-WebApp'
@@ -440,31 +462,29 @@ for repo in repos_list:
       #adding timestamp of when the data was pulled
       forks_df['timestamp_data_pulled'] = pd.to_datetime('today')
       #replacing columns with . to _
-      forks_df.columns = forks_df.columns.str.replace(r".", "_", regex=True)
-      forks_df=forks_df[['full_name','private','html_url','fork','created_at','owner_login','owner_html_url','repo','timestamp_data_pulled']]
-      forks_df_appended=pd.concat([forks_df_appended,forks_df])
-      print(str(datetime.now())+' '+repo+' ' +'successfully retreived list of forks into forks_df')
-      break 
+      if 'full_name' in forks_df.columns:
+        forks_df.columns = forks_df.columns.str.replace(r".", "_", regex=True)
+        forks_df=forks_df[['full_name','private','html_url','fork','created_at','owner_login','owner_html_url','repo','timestamp_data_pulled']]
+        forks_df_appended=pd.concat([forks_df_appended,forks_df])
+        print(str(datetime.now())+' '+repo+' ' +'successfully retreived list of forks into forks_df')
+        for i in range(0,5):
+          try:
+            #not setting schema as there are many columns
+            #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+                                                      
+            #loading into bq
+            forks_df_job = client.load_table_from_dataframe(forks_df_appended, "idc-external-025.logs.gh_forks") 
+            print('successfully loaded data from forks_df_appended dataframe to bigquery')
+            break
+          except:
+            print('loading data from forks_df_appended dataframe to bigquery was unsuccessful/n')
+            print('retrying to load into bigquery')
+            continue
+      else:
+          print('skipped converting api response to dataframe')
+          break
+      break     
     except:
       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive a list of forks was unsuccessful, check for errors while converting json response to dataframe/n')
       print('retrying')
       continue
-
-
-  for i in range(0,5):
-    try:
-      #not setting schema as there are many columns
-      #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
-
-      #loading into bq
-      forks_df_job = client.load_table_from_dataframe(forks_df_appended, "idc-external-025.logs.gh_forks") 
-      print('successfully loaded data from forks_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from forks_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
-
-
-
-
