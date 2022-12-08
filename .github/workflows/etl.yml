@@ -4,7 +4,7 @@ name: github_insights_etl
 on:
   workflow_dispatch:
   schedule:
-    - cron: 45 1 * * *
+    - cron: '45 1 * * *'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
