@@ -39,11 +39,17 @@ now=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 #repos
 #catches everything
-repos_get_request= 'https://api.github.com/user/repos'
-repos_get_request_json = gh_session.get(repos_get_request).json()
-repos_df=pd.DataFrame.from_dict(repos_get_request_json)
-repos_list=repos_df['name'].tolist()
-repos_list
+public_repos_get_request= 'https://api.github.com/orgs/ImagingDataCommons/repos?type=public'
+public_repos_get_request_json = gh_session.get(public_repos_get_request).json()
+public_repos_df=pd.DataFrame.from_dict(public_repos_get_request_json)
+public_repos_list=public_repos_df['name'].tolist()
+
+private_repos_get_request= 'https://api.github.com/orgs/ImagingDataCommons/repos?type=private'
+private_repos_get_request_json = gh_session.get(private_repos_get_request).json()
+private_repos_df=pd.DataFrame.from_dict(private_repos_get_request_json)
+private_repos_list=private_repos_df['name'].tolist()
+
+repos_list=public_repos_list+private_repos_list
 
 for repo in repos_list:
 #clones_traffic  
@@ -341,6 +347,7 @@ if findDay(now)== 'Monday':
         #cols=[col for col in contributor_commit_activity_df.columns if 'w' in col]
         contributor_commit_activity_df['w']=contributor_commit_activity_df['w'].apply(pd.to_datetime, unit = 's')
         #adding timestamp of when the data was pulled
+        contributor_commit_activity_df['repo']=repo
         contributor_commit_activity_df['timestamp_data_pulled'] = pd.to_datetime('today')
         if 'login' in contributor_commit_activity_df.columns:
           contributor_commit_activity_df=contributor_commit_activity_df[['w', 'a', 'd', 'c', 'login', 'html_url', 'type', 'site_admin','timestamp_data_pulled']]
