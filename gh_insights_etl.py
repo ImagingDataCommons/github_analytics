@@ -11,6 +11,7 @@ from google.oauth2 import service_account
 import os
 from datetime import datetime,timedelta
 import calendar
+from time import sleep
 
 
 user_name = os.environ['user_name']
@@ -374,54 +375,10 @@ if findDay(now)== 'Monday':
       break
     except:
       print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
+      print('waiting 15 seconds before retrying to load into bigquery')
+      sleep(15)  
       continue
 
-#list_repository_languages
-if findDay(now)== 'Monday':
-  for repo in repos_list:
-    for i in range(0,50):
-      try:
-        #repo='IDC-WebApp'
-        #get request for a list of languages for the specified repository. The value shown for each language is the number of bytes of code written in that language
-        #documentation: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repository-languages
-        list_repository_languages= 'https://api.github.com/repos/ImagingDataCommons/'+repo+'/languages'
-        #converting api response to json using authenticated session
-        try:
-          list_repository_languages_json = gh_session.get(list_repository_languages).json()
-          print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting list of languages for the specified repository')
-        except:
-          print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ')
-        #converting json to pandas dataframe
-        list_repository_languages_df=pd.DataFrame()  
-        list_repository_languages_df=pd.json_normalize(list_repository_languages_json)
-        #adding a column to indicate the repo_name 
-        list_repository_languages_df['repo']=repo
-        #adding timestamp of when the data was pulled
-        list_repository_languages_df['timestamp_data_pulled'] = pd.to_datetime('today')
-        list_repository_languages_df_appended=pd.concat([list_repository_languages_df_appended, list_repository_languages_df])
-        print(str(datetime.now())+' '+repo+' ' +'successfully retreived list of repository languages into list_repository_languages_df')
-        break 
-      except:
-        print(str(datetime.now())+' '+repo+' ' +'attempt to retreive a list of repository languages was unsuccessful, check for errors while converting json response to dataframe/n')
-        print('retrying')
-        continue
-
-
-  for i in range(0,5):
-    try:
-      #not setting schema as there are many columns
-      #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
-                                                
-      #loading into bq
-      list_repository_languages_df_appended.columns = list_repository_languages_df_appended.columns.str.replace(r" ", "_", regex=True)
-      list_repository_languages_df_job = client.load_table_from_dataframe(list_repository_languages_df_appended, "idc-external-025.logs.gh_repository_languages") 
-      print('successfully loaded data from list_repository_languages_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from list_repository_languages_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
 
 #forks
 if findDay(now)== 'Monday':
