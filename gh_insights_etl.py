@@ -351,7 +351,7 @@ if findDay(now)== 'Monday':
         contributor_commit_activity_df['repo']=repo
         contributor_commit_activity_df['timestamp_data_pulled'] = pd.to_datetime('today')
         if 'login' in contributor_commit_activity_df.columns:
-          contributor_commit_activity_df=contributor_commit_activity_df[['w', 'a', 'd', 'c', 'login', 'html_url', 'type', 'site_admin','timestamp_data_pulled']]
+          contributor_commit_activity_df=contributor_commit_activity_df[['w', 'a', 'd', 'c', 'login', 'html_url', 'type', 'site_admin','timestamp_data_pulled','repo']]
           contributor_commit_activity_df=contributor_commit_activity_df[contributor_commit_activity_df['w']==latest_week_sunday]
           contributor_commit_activity_df_appended=pd.concat([contributor_commit_activity_df_appended,contributor_commit_activity_df])
           print(str(datetime.now())+' '+repo+' ' +'successfully retreived all contributor commit activity into contributor_commit_activity_df')
