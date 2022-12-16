@@ -362,6 +362,8 @@ if findDay(now)== 'Monday':
       except:
         print(str(datetime.now())+' '+repo+' ' +'attempt to retreive all contributor commit activity was unsuccessful, check for errors while converting json response to dataframe/n')
         print('retrying')
+        print('waiting 15 seconds before recalling API')
+        sleep(15)  
         continue
 
   for i in range(0,5):
@@ -374,9 +376,7 @@ if findDay(now)== 'Monday':
       print('successfully loaded data from contributor_commit_activity_df_appended dataframe to bigquery')
       break
     except:
-      print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n')
-      print('waiting 15 seconds before retrying to load into bigquery')
-      sleep(15)  
+      print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n') 
       continue
 
 
