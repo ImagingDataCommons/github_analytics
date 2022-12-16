@@ -395,7 +395,7 @@ if findDay(now)== 'Monday':
         #converting api response to json using authenticated session
         try:
           forks_json = gh_session.get(forks).json()
-          print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting list of languages for the specified repository')
+          print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting list of forks for the specified repository')
         except:
           print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ') 
         #converting json to pandas dataframe
