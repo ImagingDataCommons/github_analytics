@@ -268,6 +268,7 @@ for i in range(0,5):
 
 #stargazers
 yesterday=(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")
+today=(datetime.now()).strftime("%Y-%m-%d")
 
 for repo in repos_list:
   #stargazers
@@ -293,7 +294,7 @@ for repo in repos_list:
       if 'user.login' in star_gazers_df.columns:
         star_gazers_df=star_gazers_df[['starred_at','user.login', 'user.html_url','user.type', 'user.site_admin', 'repo','timestamp_data_pulled']]
         star_gazers_df.columns = star_gazers_df.columns.str.replace(r".", "_", regex=True)
-        star_gazers_df=star_gazers_df[star_gazers_df['starred_at']>yesterday]
+        star_gazers_df=star_gazers_df[(star_gazers_df['starred_at']>yesterday)& (star_gazers_df['starred_at']<today) ]
         star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
         print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
       else:
@@ -409,7 +410,7 @@ if findDay(now)== 'Monday':
         if 'full_name' in forks_df.columns:
           forks_df.columns = forks_df.columns.str.replace(r".", "_", regex=True)
           forks_df=forks_df[['full_name','private','html_url','fork','created_at','owner_login','owner_html_url','repo','timestamp_data_pulled']]
-          #forks_df=forks_df[(forks_df['created_at']>= last_week_monday) & (forks_df['created_at']< current_week_monday)]
+          forks_df=forks_df[(forks_df['created_at']>= last_week_monday) & (forks_df['created_at']< current_week_monday)]
           forks_df_appended=pd.concat([forks_df_appended,forks_df])
           print(str(datetime.now())+' '+repo+' ' +'successfully retreived list of forks into forks_df')
         else:
