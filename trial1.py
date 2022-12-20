@@ -98,4 +98,4 @@ clone_count_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField(
                                          bigquery.SchemaField("timestamp_data_pulled", bigquery.enums.SqlTypeNames.TIMESTAMP),
                                          ])
 #loading into bq
-clone_count_df_job = client.load_table_from_dataframe(clone_count_df_appended, "idc-external-025.logs.gh_clone_count", job_config=clone_count_df_job_config)
+clone_count_df_job = client.load_table_from_dataframe(clone_count_df_appended, "superset-gke.logs.gh_clone_count", job_config=clone_count_df_job_config)
