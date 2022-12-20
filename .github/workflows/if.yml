@@ -32,5 +32,5 @@ jobs:
         user_name: ${{ secrets.USER_NAME }}
         github_token: ${{ secrets.API_TOKEN }}
       run: |
-        trial1.py
+        python trial1.py
         
