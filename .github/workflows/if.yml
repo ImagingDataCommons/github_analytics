@@ -1,6 +1,6 @@
 # This is a basic workflow that is manually triggered
 
-name: github_insights_etl
+name: identity federation
 on:
   workflow_dispatch:
   schedule:
