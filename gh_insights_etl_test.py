@@ -64,10 +64,10 @@ for repo in repos_list:
       #repo='IDC-WebApp'
       #get request for clone traffic
       #documentation:https://docs.github.com/en/rest/metrics/traffic?apiVersion=2022-11-28#get-repository-clones
-        if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
-            organization = 'qiicr'
-        else:
-            organization = 'ImagingDataCommons'
+      if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+        organization = 'qiicr'
+      else:
+        organization = 'ImagingDataCommons'
       clone_traffic_get_request= f'https://api.github.com/repos/{organization}/{repo}/traffic/clones'
       #converting api response to json using authenticated session
       try:
