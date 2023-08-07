@@ -360,7 +360,7 @@ if findDay(now)== 'Monday':
         if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
             organization = 'qiicr'
         else:
-            organization = 'ImagingDataCommons'        
+            organization = 'ImagingDataCommons'
         contributor_commit_activity_get_request= f'https://api.github.com/repos/{organization}/{repo}/stats/contributors'
         #converting api response to json using authenticated session
         try:
@@ -368,7 +368,6 @@ if findDay(now)== 'Monday':
           print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting the total number of commits authored by the contributor')
         except:
           print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ')
-        #converting json to pandas dataframe and flattening it
         contributor_commit_activity_df=pd.DataFrame() 
         #adding a column to indicate the repo_name and renaming columns
         contributor_commit_activity_df=pd.DataFrame.from_dict(contributor_commit_activity_json)
@@ -383,7 +382,7 @@ if findDay(now)== 'Monday':
         contributor_commit_activity_df['timestamp_data_pulled'] = pd.to_datetime('today')
         if 'login' in contributor_commit_activity_df.columns:
           contributor_commit_activity_df=contributor_commit_activity_df[['w', 'a', 'd', 'c', 'login', 'html_url', 'type', 'site_admin','timestamp_data_pulled','repo']]
-          contributor_commit_activity_df=contributor_commit_activity_df[contributor_commit_activity_df['w']==latest_week_sunday]
+          #contributor_commit_activity_df=contributor_commit_activity_df[contributor_commit_activity_df['w']==latest_week_sunday]
           contributor_commit_activity_df_appended=pd.concat([contributor_commit_activity_df_appended,contributor_commit_activity_df])
           print(str(datetime.now())+' '+repo+' ' +'successfully retreived all contributor commit activity into contributor_commit_activity_df')
         else:
@@ -393,8 +392,6 @@ if findDay(now)== 'Monday':
       except:
         print(str(datetime.now())+' '+repo+' ' +'attempt to retreive all contributor commit activity was unsuccessful, check for errors while converting json response to dataframe/n')
         print('retrying')
-        print('waiting 15 seconds before recalling API')
-        sleep(15)  
         continue
 
   for i in range(0,5):
