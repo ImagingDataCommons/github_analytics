@@ -38,36 +38,59 @@ def findDay(date):
 now=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-#repos
-#catches everything
-public_repos_list = []
-page = 1
-while True:
-    public_repos_get_request = f'https://api.github.com/orgs/ImagingDataCommons/repos?type=public&per_page=100&page={page}'
-    public_repos_get_request_json = gh_session.get(public_repos_get_request).json()
-    if not public_repos_get_request_json:
-        break
-    public_repos_df = pd.DataFrame.from_dict(public_repos_get_request_json)
-    public_repos_list.extend(public_repos_df['name'].tolist())
-    page += 1
+def fetch_repos_list(organization, repo_type):
+    repos_list = []
+    page = 1
+    while True:
+        repos_get_request = f'https://api.github.com/orgs/{organization}/repos?type={repo_type}&per_page=100&page={page}'
+        repos_get_request_json = gh_session.get(repos_get_request).json()
+        if not repos_get_request_json:
+            break
+        repos_df = pd.DataFrame.from_dict(repos_get_request_json)
+        repos_list.extend(repos_df['name'].tolist())
+        page += 1
+    return repos_list
 
+# Fetch public repositories for ImagingDataCommons organization
+public_repos_list = fetch_repos_list('ImagingDataCommons', 'public')
 
+# Fetch private repositories for ImagingDataCommons organization
+private_repos_list = fetch_repos_list('ImagingDataCommons', 'private')
 
-private_repos_list = []
-page = 1
-while True:
-    private_repos_get_request = f'https://api.github.com/orgs/ImagingDataCommons/repos?type=private&per_page=100&page={page}'
-    private_repos_get_request_json = gh_session.get(private_repos_get_request).json()
-    if not private_repos_get_request_json:
-        break
-    private_repos_df = pd.DataFrame.from_dict(private_repos_get_request_json)
-    private_repos_list.extend(private_repos_df['name'].tolist())
-    page += 1
+# Adding repositories from QIICR organization
+qiicr_repos = ['QuantitativeReporting', 'dcmqi', 'TCIABrowser']
+repos_list = public_repos_list + private_repos_list + qiicr_repos
 
-repos_list=public_repos_list+private_repos_list
+# Creating DataFrame
+repos_data = []
+for repo in repos_list:
+    org = 'ImagingDataCommons' if repo in public_repos_list + private_repos_list else 'QIICR'
+    privacy = 'public' if repo in public_repos_list + qiicr_repos else 'private'
+    repos_data.append({
+        'timestamp_data_pulled': pd.to_datetime('today'),
+        'organization': org,
+        'repo': repo,
+        'privacy': privacy
+    })
 
-#adding repos from qiicr organization from 8/6/23
-repos_list=repos_list+['QuantitativeReporting','dcmqi','TCIABrowser']
+repos_df = pd.DataFrame(repos_data)
+
+# Display the DataFrame
+print(repos_df)
+for i in range(0,5):
+    try:
+      #not setting schema as there are many columns
+      #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+                                                
+      #loading into bq
+      job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+      repo_df_job = client.load_table_from_dataframe(repos_df, "idc-external-025.logs.gh_repos", job_config=job_config)   
+      print('successfully loaded data from updated repos dataframe to bigquery')
+      break
+    except:
+      print('loading data from repos dataframe to bigquery was unsuccessful/n') 
+      continue
+
 
 
 
