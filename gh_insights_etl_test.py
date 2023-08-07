@@ -40,15 +40,29 @@ now=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 #repos
 #catches everything
-public_repos_get_request= 'https://api.github.com/orgs/ImagingDataCommons/repos?type=public'
-public_repos_get_request_json = gh_session.get(public_repos_get_request).json()
-public_repos_df=pd.DataFrame.from_dict(public_repos_get_request_json)
-public_repos_list=public_repos_df['name'].tolist()
+public_repos_list = []
+page = 1
+while True:
+    public_repos_get_request = f'https://api.github.com/orgs/ImagingDataCommons/repos?type=public&per_page=100&page={page}'
+    public_repos_get_request_json = gh_session.get(public_repos_get_request).json()
+    if not public_repos_get_request_json:
+        break
+    public_repos_df = pd.DataFrame.from_dict(public_repos_get_request_json)
+    public_repos_list.extend(public_repos_df['name'].tolist())
+    page += 1
 
-private_repos_get_request= 'https://api.github.com/orgs/ImagingDataCommons/repos?type=private'
-private_repos_get_request_json = gh_session.get(private_repos_get_request).json()
-private_repos_df=pd.DataFrame.from_dict(private_repos_get_request_json)
-private_repos_list=private_repos_df['name'].tolist()
+
+
+private_repos_list = []
+page = 1
+while True:
+    private_repos_get_request = f'https://api.github.com/orgs/ImagingDataCommons/repos?type=private&per_page=100&page={page}'
+    private_repos_get_request_json = gh_session.get(private_repos_get_request).json()
+    if not private_repos_get_request_json:
+        break
+    private_repos_df = pd.DataFrame.from_dict(private_repos_get_request_json)
+    private_repos_list.extend(private_repos_df['name'].tolist())
+    page += 1
 
 repos_list=public_repos_list+private_repos_list
 
