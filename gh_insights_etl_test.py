@@ -438,7 +438,7 @@ if findDay(now)== 'Monday':
                                                 
       #loading into bq
       job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-      contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity_test", job_config=job_config)   
+      contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity", job_config=job_config)   
       print('successfully loaded data from contributor_commit_activity_df_appended dataframe to bigquery')
       break
     except:
