@@ -38,19 +38,61 @@ def findDay(date):
 now=datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-#repos
-#catches everything
-public_repos_get_request= 'https://api.github.com/orgs/ImagingDataCommons/repos?type=public'
-public_repos_get_request_json = gh_session.get(public_repos_get_request).json()
-public_repos_df=pd.DataFrame.from_dict(public_repos_get_request_json)
-public_repos_list=public_repos_df['name'].tolist()
+def fetch_repos_list(organization, repo_type):
+    repos_list = []
+    page = 1
+    while True:
+        repos_get_request = f'https://api.github.com/orgs/{organization}/repos?type={repo_type}&per_page=100&page={page}'
+        repos_get_request_json = gh_session.get(repos_get_request).json()
+        if not repos_get_request_json:
+            break
+        repos_df = pd.DataFrame.from_dict(repos_get_request_json)
+        repos_list.extend(repos_df['name'].tolist())
+        page += 1
+    return repos_list
 
-private_repos_get_request= 'https://api.github.com/orgs/ImagingDataCommons/repos?type=private'
-private_repos_get_request_json = gh_session.get(private_repos_get_request).json()
-private_repos_df=pd.DataFrame.from_dict(private_repos_get_request_json)
-private_repos_list=private_repos_df['name'].tolist()
+# Fetch public repositories for ImagingDataCommons organization
+public_repos_list = fetch_repos_list('ImagingDataCommons', 'public')
 
-repos_list=public_repos_list+private_repos_list
+# Fetch private repositories for ImagingDataCommons organization
+private_repos_list = fetch_repos_list('ImagingDataCommons', 'private')
+
+# Adding repositories from QIICR organization
+qiicr_repos = ['QuantitativeReporting', 'dcmqi', 'TCIABrowser']
+repos_list = public_repos_list + private_repos_list + qiicr_repos
+
+# Creating DataFrame
+repos_data = []
+for repo in repos_list:
+    org = 'ImagingDataCommons' if repo in public_repos_list + private_repos_list else 'QIICR'
+    privacy = 'public' if repo in public_repos_list + qiicr_repos else 'private'
+    repos_data.append({
+        'timestamp_data_pulled': pd.to_datetime('today'),
+        'organization': org,
+        'repo': repo,
+        'privacy': privacy
+    })
+
+repos_df = pd.DataFrame(repos_data)
+
+# Display the DataFrame
+print(repos_df)
+for i in range(0,5):
+    try:
+      #not setting schema as there are many columns
+      #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+                                                
+      #loading into bq
+      job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+      repo_df_job = client.load_table_from_dataframe(repos_df, "idc-external-025.logs.gh_repos", job_config=job_config)   
+      print('successfully loaded data from updated repos dataframe to bigquery')
+      break
+    except:
+      print('loading data from repos dataframe to bigquery was unsuccessful/n') 
+      continue
+
+
+
 
 for repo in repos_list:
 #clones_traffic  
@@ -59,7 +101,11 @@ for repo in repos_list:
       #repo='IDC-WebApp'
       #get request for clone traffic
       #documentation:https://docs.github.com/en/rest/metrics/traffic?apiVersion=2022-11-28#get-repository-clones
-      clone_traffic_get_request= 'https://api.github.com/repos/ImagingDataCommons/'+repo+'/traffic/clones'
+      if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+        organization = 'qiicr'
+      else:
+        organization = 'ImagingDataCommons'
+      clone_traffic_get_request= f'https://api.github.com/repos/{organization}/{repo}/traffic/clones'
       #converting api response to json using authenticated session
       try:
         clone_traffic_get_request_json = gh_session.get(clone_traffic_get_request).json()
@@ -114,7 +160,11 @@ for repo in repos_list:
       #repo='IDC-WebApp'
       #get request for views traffic
       #documentation:https://docs.github.com/en/rest/metrics/traffic?apiVersion=2022-11-28#get-page-views
-      view_traffic_get_request='https://api.github.com/repos/ImagingDataCommons/'+repo+'/traffic/views'
+      if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+        organization = 'qiicr'
+      else:
+        organization = 'ImagingDataCommons'
+      view_traffic_get_request=f'https://api.github.com/repos/{organization}/{repo}/traffic/views'
       #converting api response to json using authenticated session
       try:
         views_traffic_json= gh_session.get(view_traffic_get_request).json()
@@ -169,7 +219,12 @@ for repo in repos_list:
       #repo='IDC-WebApp'
       #get request for top 10 referrers over the last 14 days.
       #documentation: https://docs.github.com/en/rest/metrics/traffic?apiVersion=2022-11-28#get-top-referral-sources
-      top_referrers_get_request='https://api.github.com/repos/ImagingDataCommons/'+repo+'/traffic/popular/referrers'
+      if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+          organization = 'qiicr'
+      else:
+          organization = 'ImagingDataCommons'     
+
+      top_referrers_get_request=f'https://api.github.com/repos/{organization}/{repo}/traffic/popular/referrers'
       #converting api response to json using authenticated session
       try:
         top_referrers_json = gh_session.get(top_referrers_get_request).json()
@@ -221,7 +276,11 @@ for repo in repos_list:
       #repo='IDC-WebApp'
       #get request for popular paths over the last 14 days.
       #documentation: https://docs.github.com/en/rest/metrics/traffic?apiVersion=2022-11-28#get-top-referral-paths
-      top_paths_get_request='https://api.github.com/repos/ImagingDataCommons/'+repo+'/traffic/popular/paths'
+      if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+          organization = 'qiicr'
+      else:
+          organization = 'ImagingDataCommons'      
+      top_paths_get_request=f'https://api.github.com/repos/{organization}/{repo}/traffic/popular/paths'
       #converting api response to json using authenticated session
       try:
         top_paths_json = gh_session.get(top_paths_get_request).json()
@@ -266,58 +325,62 @@ for i in range(0,5):
     print('retrying to load into bigquery')
     continue      
 
-#stargazers
-yesterday=(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")
-today=(datetime.now()).strftime("%Y-%m-%d")
+# #stargazers
+# yesterday=(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")
+# today=(datetime.now()).strftime("%Y-%m-%d")
 
-for repo in repos_list:
-  #stargazers
-  for i in range(0,50):
-    try:
-      #repo='ai_medima_misc '
-      #get request for list of people that have starred the repository
-      #documentation:https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#list-stargazers
-      star_gazers_get_request='https://api.github.com/repos/ImagingDataCommons/'+repo+'/stargazers'
-      #converting api response to json using authenticated session
-      try:
-        star_gazers_json = gh_session.get(star_gazers_get_request,headers ={'accept':'application/vnd.github.v3.star+json'}).json()
-        print (str(datetime.now())+' '+repo+' ' +'authentication successful while requesting for list of people that have starred the repository')
-      except:
-        print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ')
-      #converting json to pandas dataframe
-      star_gazers_df=pd.DataFrame() 
-      star_gazers_df= pd.json_normalize(star_gazers_json)
-      #adding a column to indicate the repo_name, and a timestamp
-      star_gazers_df['repo']=repo
-      star_gazers_df['timestamp_data_pulled'] = pd.to_datetime('today')
-      #selecting only a few columns
-      if 'user.login' in star_gazers_df.columns:
-        star_gazers_df=star_gazers_df[['starred_at','user.login', 'user.html_url','user.type', 'user.site_admin', 'repo','timestamp_data_pulled']]
-        star_gazers_df.columns = star_gazers_df.columns.str.replace(r".", "_", regex=True)
-        star_gazers_df=star_gazers_df[(star_gazers_df['starred_at']>yesterday)& (star_gazers_df['starred_at']<today) ]
-        star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
-        print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
-      else:
-        print('skipped converting api response to dataframe')
-        break
-      break
-    except:
-      print(str(datetime.now())+' '+repo+' ' +'attempt to retreive stargazers was unsuccessful, check for errors while converting json response to dataframe/n') 
-      print('retrying')
-      continue
+# for repo in repos_list:
+#   #stargazers
+#   for i in range(0,50):
+#     try:
+#       #repo='ai_medima_misc '
+#       #get request for list of people that have starred the repository
+#       #documentation:https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#list-stargazers
+#       if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+#           organization = 'qiicr'
+#       else:
+#           organization = 'ImagingDataCommons'      
+#       star_gazers_get_request=f'https://api.github.com/repos/{organization}/{repo}/stargazers'
+#       #converting api response to json using authenticated session
+#       try:
+#         star_gazers_json = gh_session.get(star_gazers_get_request,headers ={'accept':'application/vnd.github.v3.star+json'}).json()
+#         print (str(datetime.now())+' '+repo+' ' +'authentication successful while requesting for list of people that have starred the repository')
+#       except:
+#         print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ')
+#       #converting json to pandas dataframe
+#       star_gazers_df=pd.DataFrame() 
+#       star_gazers_df= pd.json_normalize(star_gazers_json)
+#       #adding a column to indicate the repo_name, and a timestamp
+#       star_gazers_df['repo']=repo
+#       star_gazers_df['timestamp_data_pulled'] = pd.to_datetime('today')
+#       #selecting only a few columns
+#       if 'user.login' in star_gazers_df.columns:
+#         star_gazers_df=star_gazers_df[['starred_at','user.login', 'user.html_url','user.type', 'user.site_admin', 'repo','timestamp_data_pulled']]
+#         star_gazers_df.columns = star_gazers_df.columns.str.replace(r".", "_", regex=True)
+#         star_gazers_df=star_gazers_df[(star_gazers_df['starred_at']>yesterday)& (star_gazers_df['starred_at']<today) ]
+#         star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
+#         print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
+#       else:
+#         print('skipped converting api response to dataframe')
+#         break
+#       break
+#     except:
+#       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive stargazers was unsuccessful, check for errors while converting json response to dataframe/n') 
+#       print('retrying')
+#       continue
 
-for i in range(0,5):
-  try:
-    #not setting schema as there are many columns
-    #star_gazers_df_job_config = []
-    #loading into bq
-    star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers") 
-    print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
-    break
-  except:
-    print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
-    print('retrying to load into bigquery')
-    continue
+# for i in range(0,5):
+#   try:
+#     #not setting schema as there are many columns
+#     #star_gazers_df_job_config = []
+#     #loading into bq
+#     star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers") 
+#     print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
+#     break
+#   except:
+#     print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
+#     print('retrying to load into bigquery')
+#     continue
 
 
 #contributor_commit_activity
@@ -331,14 +394,17 @@ if findDay(now)== 'Monday':
         #repo='IDC-WebApp'
         #get request for the total number of commits authored by the contributor (the response includes a Weekly Hash (weeks array)) in the repository
         #documentation:https://docs.github.com/en/rest/metrics/statistics?apiVersion=2022-11-28#get-all-contributor-commit-activity
-        contributor_commit_activity_get_request= 'https://api.github.com/repos/ImagingDataCommons/'+repo+'/stats/contributors'
+        if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+            organization = 'qiicr'
+        else:
+            organization = 'ImagingDataCommons'
+        contributor_commit_activity_get_request= f'https://api.github.com/repos/{organization}/{repo}/stats/contributors'
         #converting api response to json using authenticated session
         try:
           contributor_commit_activity_json = gh_session.get(contributor_commit_activity_get_request).json()
           print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting the total number of commits authored by the contributor')
         except:
           print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ')
-        #converting json to pandas dataframe and flattening it
         contributor_commit_activity_df=pd.DataFrame() 
         #adding a column to indicate the repo_name and renaming columns
         contributor_commit_activity_df=pd.DataFrame.from_dict(contributor_commit_activity_json)
@@ -353,7 +419,7 @@ if findDay(now)== 'Monday':
         contributor_commit_activity_df['timestamp_data_pulled'] = pd.to_datetime('today')
         if 'login' in contributor_commit_activity_df.columns:
           contributor_commit_activity_df=contributor_commit_activity_df[['w', 'a', 'd', 'c', 'login', 'html_url', 'type', 'site_admin','timestamp_data_pulled','repo']]
-          contributor_commit_activity_df=contributor_commit_activity_df[contributor_commit_activity_df['w']==latest_week_sunday]
+          #contributor_commit_activity_df=contributor_commit_activity_df[contributor_commit_activity_df['w']==latest_week_sunday]
           contributor_commit_activity_df_appended=pd.concat([contributor_commit_activity_df_appended,contributor_commit_activity_df])
           print(str(datetime.now())+' '+repo+' ' +'successfully retreived all contributor commit activity into contributor_commit_activity_df')
         else:
@@ -363,8 +429,6 @@ if findDay(now)== 'Monday':
       except:
         print(str(datetime.now())+' '+repo+' ' +'attempt to retreive all contributor commit activity was unsuccessful, check for errors while converting json response to dataframe/n')
         print('retrying')
-        print('waiting 15 seconds before recalling API')
-        sleep(15)  
         continue
 
   for i in range(0,5):
@@ -373,65 +437,69 @@ if findDay(now)== 'Monday':
       #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
                                                 
       #loading into bq
-      contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity") 
+      job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+      contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity", job_config=job_config)   
       print('successfully loaded data from contributor_commit_activity_df_appended dataframe to bigquery')
       break
     except:
       print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n') 
       continue
 
+# #forks
+# if findDay(now)== 'Monday':
+#   for repo in repos_list:
+#     current_week_monday=(datetime.now()).strftime("%Y-%m-%d")
+#     last_week_monday=(datetime.now()- timedelta(days=7)).strftime("%Y-%m-%d")
+#     for i in range(0,50):
+#       try:
+#         #repo='IDC-WebApp'
+#         #get request for list of the forks of the repository. lists only the forks originated from the repository and does not list complete fork history. 
+#         #i.e the current repository may itself be a fork of some other repository
+#         #documentation: https://docs.github.com/en/rest/repos/forks?apiVersion=2022-11-28#list-forks
+#         if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+#             organization = 'qiicr'
+#         else:
+#             organization = 'ImagingDataCommons'        
+#         forks= f'https://api.github.com/repos/{organization}/{repo}/forks'
+#         #converting api response to json using authenticated session
+#         try:
+#           forks_json = gh_session.get(forks).json()
+#           print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting list of forks for the specified repository')
+#         except:
+#           print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ') 
+#         #converting json to pandas dataframe
+#         forks_df=pd.DataFrame() 
+#         forks_df=pd.json_normalize(forks_json)
+#         #adding a column to indicate the repo_name 
+#         forks_df['repo']=repo
+#         #adding timestamp of when the data was pulled
+#         forks_df['timestamp_data_pulled'] = pd.to_datetime('today')
+#         #replacing columns with . to _
+#         if 'full_name' in forks_df.columns:
+#           forks_df.columns = forks_df.columns.str.replace(r".", "_", regex=True)
+#           forks_df=forks_df[['full_name','private','html_url','fork','created_at','owner_login','owner_html_url','repo','timestamp_data_pulled']]
+#           forks_df=forks_df[(forks_df['created_at']>= last_week_monday) & (forks_df['created_at']< current_week_monday)]
+#           forks_df_appended=pd.concat([forks_df_appended,forks_df])
+#           print(str(datetime.now())+' '+repo+' ' +'successfully retreived list of forks into forks_df')
+#         else:
+#             print('skipped converting api response to dataframe')
+#             break
+#         break     
+#       except:
+#         print(str(datetime.now())+' '+repo+' ' +'attempt to retreive a list of forks was unsuccessful, check for errors while converting json response to dataframe/n')
+#         print('retrying')
+#         continue
 
-#forks
-if findDay(now)== 'Monday':
-  for repo in repos_list:
-    current_week_monday=(datetime.now()).strftime("%Y-%m-%d")
-    last_week_monday=(datetime.now()- timedelta(days=7)).strftime("%Y-%m-%d")
-    for i in range(0,50):
-      try:
-        #repo='IDC-WebApp'
-        #get request for list of the forks of the repository. lists only the forks originated from the repository and does not list complete fork history. 
-        #i.e the current repository may itself be a fork of some other repository
-        #documentation: https://docs.github.com/en/rest/repos/forks?apiVersion=2022-11-28#list-forks
-        forks= 'https://api.github.com/repos/ImagingDataCommons/'+repo+'/forks'
-        #converting api response to json using authenticated session
-        try:
-          forks_json = gh_session.get(forks).json()
-          print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting list of forks for the specified repository')
-        except:
-          print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ') 
-        #converting json to pandas dataframe
-        forks_df=pd.DataFrame() 
-        forks_df=pd.json_normalize(forks_json)
-        #adding a column to indicate the repo_name 
-        forks_df['repo']=repo
-        #adding timestamp of when the data was pulled
-        forks_df['timestamp_data_pulled'] = pd.to_datetime('today')
-        #replacing columns with . to _
-        if 'full_name' in forks_df.columns:
-          forks_df.columns = forks_df.columns.str.replace(r".", "_", regex=True)
-          forks_df=forks_df[['full_name','private','html_url','fork','created_at','owner_login','owner_html_url','repo','timestamp_data_pulled']]
-          forks_df=forks_df[(forks_df['created_at']>= last_week_monday) & (forks_df['created_at']< current_week_monday)]
-          forks_df_appended=pd.concat([forks_df_appended,forks_df])
-          print(str(datetime.now())+' '+repo+' ' +'successfully retreived list of forks into forks_df')
-        else:
-            print('skipped converting api response to dataframe')
-            break
-        break     
-      except:
-        print(str(datetime.now())+' '+repo+' ' +'attempt to retreive a list of forks was unsuccessful, check for errors while converting json response to dataframe/n')
-        print('retrying')
-        continue
-
-  for i in range(0,5):
-    try:
-      #not setting schema as there are many columns
-      #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+#   for i in range(0,5):
+#     try:
+#       #not setting schema as there are many columns
+#       #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
                                                 
-      #loading into bq
-      forks_df_job = client.load_table_from_dataframe(forks_df_appended, "idc-external-025.logs.gh_forks") 
-      print('successfully loaded data from forks_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from forks_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
+#       #loading into bq
+#       forks_df_job = client.load_table_from_dataframe(forks_df_appended, "idc-external-025.logs.gh_forks") 
+#       print('successfully loaded data from forks_df_appended dataframe to bigquery')
+#       break
+#     except:
+#       print('loading data from forks_df_appended dataframe to bigquery was unsuccessful/n')
+#       print('retrying to load into bigquery')
+#       continue
