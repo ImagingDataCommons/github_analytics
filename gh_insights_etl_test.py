@@ -302,62 +302,62 @@ for i in range(0,5):
     print('retrying to load into bigquery')
     continue      
 
-#stargazers
-yesterday=(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")
-today=(datetime.now()).strftime("%Y-%m-%d")
+# #stargazers
+# yesterday=(datetime.now()- timedelta(days=1)).strftime("%Y-%m-%d")
+# today=(datetime.now()).strftime("%Y-%m-%d")
 
-for repo in repos_list:
-  #stargazers
-  for i in range(0,50):
-    try:
-      #repo='ai_medima_misc '
-      #get request for list of people that have starred the repository
-      #documentation:https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#list-stargazers
-      if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
-          organization = 'qiicr'
-      else:
-          organization = 'ImagingDataCommons'      
-      star_gazers_get_request=f'https://api.github.com/repos/{organization}/{repo}/stargazers'
-      #converting api response to json using authenticated session
-      try:
-        star_gazers_json = gh_session.get(star_gazers_get_request,headers ={'accept':'application/vnd.github.v3.star+json'}).json()
-        print (str(datetime.now())+' '+repo+' ' +'authentication successful while requesting for list of people that have starred the repository')
-      except:
-        print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ')
-      #converting json to pandas dataframe
-      star_gazers_df=pd.DataFrame() 
-      star_gazers_df= pd.json_normalize(star_gazers_json)
-      #adding a column to indicate the repo_name, and a timestamp
-      star_gazers_df['repo']=repo
-      star_gazers_df['timestamp_data_pulled'] = pd.to_datetime('today')
-      #selecting only a few columns
-      if 'user.login' in star_gazers_df.columns:
-        star_gazers_df=star_gazers_df[['starred_at','user.login', 'user.html_url','user.type', 'user.site_admin', 'repo','timestamp_data_pulled']]
-        star_gazers_df.columns = star_gazers_df.columns.str.replace(r".", "_", regex=True)
-        star_gazers_df=star_gazers_df[(star_gazers_df['starred_at']>yesterday)& (star_gazers_df['starred_at']<today) ]
-        star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
-        print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
-      else:
-        print('skipped converting api response to dataframe')
-        break
-      break
-    except:
-      print(str(datetime.now())+' '+repo+' ' +'attempt to retreive stargazers was unsuccessful, check for errors while converting json response to dataframe/n') 
-      print('retrying')
-      continue
+# for repo in repos_list:
+#   #stargazers
+#   for i in range(0,50):
+#     try:
+#       #repo='ai_medima_misc '
+#       #get request for list of people that have starred the repository
+#       #documentation:https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#list-stargazers
+#       if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+#           organization = 'qiicr'
+#       else:
+#           organization = 'ImagingDataCommons'      
+#       star_gazers_get_request=f'https://api.github.com/repos/{organization}/{repo}/stargazers'
+#       #converting api response to json using authenticated session
+#       try:
+#         star_gazers_json = gh_session.get(star_gazers_get_request,headers ={'accept':'application/vnd.github.v3.star+json'}).json()
+#         print (str(datetime.now())+' '+repo+' ' +'authentication successful while requesting for list of people that have starred the repository')
+#       except:
+#         print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ')
+#       #converting json to pandas dataframe
+#       star_gazers_df=pd.DataFrame() 
+#       star_gazers_df= pd.json_normalize(star_gazers_json)
+#       #adding a column to indicate the repo_name, and a timestamp
+#       star_gazers_df['repo']=repo
+#       star_gazers_df['timestamp_data_pulled'] = pd.to_datetime('today')
+#       #selecting only a few columns
+#       if 'user.login' in star_gazers_df.columns:
+#         star_gazers_df=star_gazers_df[['starred_at','user.login', 'user.html_url','user.type', 'user.site_admin', 'repo','timestamp_data_pulled']]
+#         star_gazers_df.columns = star_gazers_df.columns.str.replace(r".", "_", regex=True)
+#         star_gazers_df=star_gazers_df[(star_gazers_df['starred_at']>yesterday)& (star_gazers_df['starred_at']<today) ]
+#         star_gazers_df_appended=pd.concat([star_gazers_df_appended,star_gazers_df]) 
+#         print(str(datetime.now())+' '+repo+' ' +'successfully retreived the list of stargazers into star_gazers_df')
+#       else:
+#         print('skipped converting api response to dataframe')
+#         break
+#       break
+#     except:
+#       print(str(datetime.now())+' '+repo+' ' +'attempt to retreive stargazers was unsuccessful, check for errors while converting json response to dataframe/n') 
+#       print('retrying')
+#       continue
 
-for i in range(0,5):
-  try:
-    #not setting schema as there are many columns
-    #star_gazers_df_job_config = []
-    #loading into bq
-    star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers_test") 
-    print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
-    break
-  except:
-    print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
-    print('retrying to load into bigquery')
-    continue
+# for i in range(0,5):
+#   try:
+#     #not setting schema as there are many columns
+#     #star_gazers_df_job_config = []
+#     #loading into bq
+#     star_gazers_df_job = client.load_table_from_dataframe(star_gazers_df_appended, "idc-external-025.logs.gh_star_gazers_test") 
+#     print('successfully loaded data from star_gazers_df_appended dataframe to bigquery')
+#     break
+#   except:
+#     print('loading data from star_gazers_df_appended dataframe to bigquery was unsuccessful/n')
+#     print('retrying to load into bigquery')
+#     continue
 
 
 #contributor_commit_activity
@@ -422,61 +422,61 @@ if findDay(now)== 'Monday':
       print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n') 
       continue
 
-#forks
-if findDay(now)== 'Monday':
-  for repo in repos_list:
-    current_week_monday=(datetime.now()).strftime("%Y-%m-%d")
-    last_week_monday=(datetime.now()- timedelta(days=7)).strftime("%Y-%m-%d")
-    for i in range(0,50):
-      try:
-        #repo='IDC-WebApp'
-        #get request for list of the forks of the repository. lists only the forks originated from the repository and does not list complete fork history. 
-        #i.e the current repository may itself be a fork of some other repository
-        #documentation: https://docs.github.com/en/rest/repos/forks?apiVersion=2022-11-28#list-forks
-        if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
-            organization = 'qiicr'
-        else:
-            organization = 'ImagingDataCommons'        
-        forks= f'https://api.github.com/repos/{organization}/{repo}/forks'
-        #converting api response to json using authenticated session
-        try:
-          forks_json = gh_session.get(forks).json()
-          print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting list of forks for the specified repository')
-        except:
-          print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ') 
-        #converting json to pandas dataframe
-        forks_df=pd.DataFrame() 
-        forks_df=pd.json_normalize(forks_json)
-        #adding a column to indicate the repo_name 
-        forks_df['repo']=repo
-        #adding timestamp of when the data was pulled
-        forks_df['timestamp_data_pulled'] = pd.to_datetime('today')
-        #replacing columns with . to _
-        if 'full_name' in forks_df.columns:
-          forks_df.columns = forks_df.columns.str.replace(r".", "_", regex=True)
-          forks_df=forks_df[['full_name','private','html_url','fork','created_at','owner_login','owner_html_url','repo','timestamp_data_pulled']]
-          forks_df=forks_df[(forks_df['created_at']>= last_week_monday) & (forks_df['created_at']< current_week_monday)]
-          forks_df_appended=pd.concat([forks_df_appended,forks_df])
-          print(str(datetime.now())+' '+repo+' ' +'successfully retreived list of forks into forks_df')
-        else:
-            print('skipped converting api response to dataframe')
-            break
-        break     
-      except:
-        print(str(datetime.now())+' '+repo+' ' +'attempt to retreive a list of forks was unsuccessful, check for errors while converting json response to dataframe/n')
-        print('retrying')
-        continue
+# #forks
+# if findDay(now)== 'Monday':
+#   for repo in repos_list:
+#     current_week_monday=(datetime.now()).strftime("%Y-%m-%d")
+#     last_week_monday=(datetime.now()- timedelta(days=7)).strftime("%Y-%m-%d")
+#     for i in range(0,50):
+#       try:
+#         #repo='IDC-WebApp'
+#         #get request for list of the forks of the repository. lists only the forks originated from the repository and does not list complete fork history. 
+#         #i.e the current repository may itself be a fork of some other repository
+#         #documentation: https://docs.github.com/en/rest/repos/forks?apiVersion=2022-11-28#list-forks
+#         if repo in ['TCIABrowser', 'dcmqi', 'QuantitativeReporting']:
+#             organization = 'qiicr'
+#         else:
+#             organization = 'ImagingDataCommons'        
+#         forks= f'https://api.github.com/repos/{organization}/{repo}/forks'
+#         #converting api response to json using authenticated session
+#         try:
+#           forks_json = gh_session.get(forks).json()
+#           print(str(datetime.now())+' '+repo+' ' +'authentication successful while requesting list of forks for the specified repository')
+#         except:
+#           print(str(datetime.now())+' '+repo+' ' +'authentication unsuccessful,perhaps a time out error ') 
+#         #converting json to pandas dataframe
+#         forks_df=pd.DataFrame() 
+#         forks_df=pd.json_normalize(forks_json)
+#         #adding a column to indicate the repo_name 
+#         forks_df['repo']=repo
+#         #adding timestamp of when the data was pulled
+#         forks_df['timestamp_data_pulled'] = pd.to_datetime('today')
+#         #replacing columns with . to _
+#         if 'full_name' in forks_df.columns:
+#           forks_df.columns = forks_df.columns.str.replace(r".", "_", regex=True)
+#           forks_df=forks_df[['full_name','private','html_url','fork','created_at','owner_login','owner_html_url','repo','timestamp_data_pulled']]
+#           forks_df=forks_df[(forks_df['created_at']>= last_week_monday) & (forks_df['created_at']< current_week_monday)]
+#           forks_df_appended=pd.concat([forks_df_appended,forks_df])
+#           print(str(datetime.now())+' '+repo+' ' +'successfully retreived list of forks into forks_df')
+#         else:
+#             print('skipped converting api response to dataframe')
+#             break
+#         break     
+#       except:
+#         print(str(datetime.now())+' '+repo+' ' +'attempt to retreive a list of forks was unsuccessful, check for errors while converting json response to dataframe/n')
+#         print('retrying')
+#         continue
 
-  for i in range(0,5):
-    try:
-      #not setting schema as there are many columns
-      #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
+#   for i in range(0,5):
+#     try:
+#       #not setting schema as there are many columns
+#       #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
                                                 
-      #loading into bq
-      forks_df_job = client.load_table_from_dataframe(forks_df_appended, "idc-external-025.logs.gh_forks_test") 
-      print('successfully loaded data from forks_df_appended dataframe to bigquery')
-      break
-    except:
-      print('loading data from forks_df_appended dataframe to bigquery was unsuccessful/n')
-      print('retrying to load into bigquery')
-      continue
+#       #loading into bq
+#       forks_df_job = client.load_table_from_dataframe(forks_df_appended, "idc-external-025.logs.gh_forks_test") 
+#       print('successfully loaded data from forks_df_appended dataframe to bigquery')
+#       break
+#     except:
+#       print('loading data from forks_df_appended dataframe to bigquery was unsuccessful/n')
+#       print('retrying to load into bigquery')
+#       continue
