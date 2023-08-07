@@ -414,13 +414,13 @@ if findDay(now)== 'Monday':
       #commits_df_job_config = bigquery.LoadJobConfig(schema=[bigquery.SchemaField("days", bigquery.enums.SqlTypeNames.STRING), ])
                                                 
       #loading into bq
-      contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity_test") 
+      job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+      contributor_commit_activity_df_job = client.load_table_from_dataframe(contributor_commit_activity_df_appended, "idc-external-025.logs.gh_contributor_commit_activity_test", job_config=job_config)   
       print('successfully loaded data from contributor_commit_activity_df_appended dataframe to bigquery')
       break
     except:
       print('loading data from contributor_commit_activity_df_appended dataframe to bigquery was unsuccessful/n') 
       continue
-
 
 #forks
 if findDay(now)== 'Monday':
