@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests pandas flatten_json google-cloud-bigquery pyarrow google-analytics-data
+        pip install requests pandas google-cloud-bigquery pyarrow google-analytics-data
         
     - name: Authorize google cloud 
       uses: google-github-actions/auth@v1
