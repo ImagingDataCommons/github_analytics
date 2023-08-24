@@ -442,6 +442,33 @@ ga4_behavior_summary_table = pd.DataFrame(summary_rows_ga4_behavior)
 ga4_behavior_summary_table
 
 """###**Pushing dataframes to Bigquery tables**"""
+combined_ga4_audience_df['totalUsers']=combined_ga4_audience_df['totalUsers'].astype(int)
+combined_ga4_audience_df['newUsers']=combined_ga4_audience_df['newUsers'].astype(int)
+combined_ga4_audience_df['sessions']=combined_ga4_audience_df['sessions'].astype(int)
+combined_ga4_audience_df['engagedSessions']=combined_ga4_audience_df['engagedSessions'].astype(int)
+combined_ga4_audience_df['screenPageViews']=combined_ga4_audience_df['screenPageViews'].astype(int)
+
+ga4_audience_job_config = bigquery.LoadJobConfig(schema=[
+                                            bigquery.SchemaField("property_id", bigquery.enums.SqlTypeNames.STRING),
+                                            bigquery.SchemaField("website", bigquery.enums.SqlTypeNames.STRING),
+                                            bigquery.SchemaField("date", bigquery.enums.SqlTypeNames.TIMESTAMP),
+                                            bigquery.SchemaField("country", bigquery.enums.SqlTypeNames.STRING),
+                                            bigquery.SchemaField("totalUsers", bigquery.enums.SqlTypeNames.INT64),
+                                            bigquery.SchemaField("newUsers", bigquery.enums.SqlTypeNames.INT64),
+                                            bigquery.SchemaField("sessions", bigquery.enums.SqlTypeNames.INT64),
+                                            bigquery.SchemaField("engagedSessions", bigquery.enums.SqlTypeNames.INT64),
+                                            bigquery.SchemaField("screenPageViews", bigquery.enums.SqlTypeNames.INT64),
+                                            bigquery.SchemaField("averageSessionDuration", bigquery.enums.SqlTypeNames.FLOAT64),
+                                            bigquery.SchemaField("totalSessionDuration", bigquery.enums.SqlTypeNames.FLOAT64),
+                                            ],
+                                            #write_disposition="WRITE_TRUNCATE"
+                                                        )
+
+ga4_audience_job = client.load_table_from_dataframe(combined_ga4_audience_df, "idc-external-025.logs.google_analytics_ga4_audience" , job_config=ga4_audience_job_config
+                                                    )
+
+
+
 
 ga4_audience_summary_job_config = bigquery.LoadJobConfig(schema=[
                                             bigquery.SchemaField("date", bigquery.enums.SqlTypeNames.TIMESTAMP),
