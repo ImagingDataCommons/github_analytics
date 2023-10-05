@@ -30,4 +30,4 @@ jobs:
         credentials_json: '${{ secrets.GOOGLE_ANALYTICS_API_SERVICE_ACCOUNT}}'
     - name: Run github etl script        
       run: |
-        python googleAnalyticsApiGa4Only.py
+        python /src/pythonScripts/googleAnalytics/googleAnalyticsApiGa4Only.py
