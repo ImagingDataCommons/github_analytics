@@ -1,0 +1,39 @@
+name: Dry Run BigQuery Queries
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * *' # Schedule this workflow to run daily at midnight UTC
+
+jobs:
+  dry-run-queries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas google-cloud-bigquery pyarrow google-analytics-data
+          
+      - name: Authorize google cloud 
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GOOGLE_ANALYTICS_API_SERVICE_ACCOUNT}}'
+      
+      - name: List SQL Files
+        run: |
+          find src/sql -type f -name "*.sql" > queries.txt
+          cat queries.txt
+      
+      - name: Dry Run SQL Queries
+        run: |
+          while IFS= read -r query_file; do
+            echo "Dry running $query_file"
+            bq query --use_legacy_sql=false --dry_run < "$query_file"
+          done < queries.txt
