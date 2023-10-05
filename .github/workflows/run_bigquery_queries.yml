@@ -25,7 +25,11 @@ jobs:
         uses: google-github-actions/auth@v1
         with:
           credentials_json: '${{ secrets.GOOGLE_ANALYTICS_API_SERVICE_ACCOUNT}}'
-      
+
+      # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'      
+        
       - name: List SQL Files
         run: |
           find src/sql -type f -name "*.sql" > queries.txt
