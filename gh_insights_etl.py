@@ -54,12 +54,9 @@ def fetch_repos_list(organization, repo_type):
 # Fetch public repositories for ImagingDataCommons organization
 public_repos_list = fetch_repos_list('ImagingDataCommons', 'public')
 
-# Fetch private repositories for ImagingDataCommons organization
-private_repos_list = fetch_repos_list('ImagingDataCommons', 'private')
-
 # Adding repositories from QIICR organization
 qiicr_repos = ['QuantitativeReporting', 'dcmqi', 'TCIABrowser']
-repos_list = public_repos_list + private_repos_list + qiicr_repos
+repos_list = public_repos_list  + qiicr_repos
 
 # Creating DataFrame
 repos_data = []
