@@ -34,5 +34,5 @@ jobs:
         user_name: ${{ secrets.USER_NAME }}
         github_token: ${{ secrets.API_TOKEN }}
       run: |
-        python /src/pythonScripts/github/gh_insights_etl.py
+        python src/pythonScripts/github/gh_insights_etl.py
         
