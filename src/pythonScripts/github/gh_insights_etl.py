@@ -61,7 +61,7 @@ repos_list = public_repos_list  + qiicr_repos
 # Creating DataFrame
 repos_data = []
 for repo in repos_list:
-    org = 'ImagingDataCommons' if repo in public_repos_list + private_repos_list else 'QIICR'
+    org = 'ImagingDataCommons' if repo in public_repos_list  else 'QIICR'
     privacy = 'public' if repo in public_repos_list + qiicr_repos else 'private'
     repos_data.append({
         'timestamp_data_pulled': pd.to_datetime('today'),
