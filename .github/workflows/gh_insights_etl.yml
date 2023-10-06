@@ -27,8 +27,8 @@ jobs:
     - name: Authorize google cloud 
       uses: google-github-actions/auth@v1
       with:
-        workload_identity_provider: 'projects/541809542441/locations/global/workloadIdentityPools/superset-pools/providers/github-superset'
-        service_account: 'superset@idc-external-025.iam.gserviceaccount.com'
+        credentials_json: '${{ secrets.GOOGLE_ANALYTICS_API_SERVICE_ACCOUNT}}'
+        
     - name: Run github etl script        
       env:
         user_name: ${{ secrets.USER_NAME }}
