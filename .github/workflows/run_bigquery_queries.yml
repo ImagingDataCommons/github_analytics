@@ -1,4 +1,4 @@
-name: Dry Run BigQuery Queries
+name: Run BigQuery Queries for Udash
 
 on:
   workflow_dispatch:
