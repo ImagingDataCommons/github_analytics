@@ -2,8 +2,8 @@ name: Dry Run BigQuery Queries
 
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: '0 8 * * *' # Schedule this workflow to run daily at midnight UTC
+ schedule:
+    - cron: 0 12 * * *
 
 jobs:
   dry-run-queries:
@@ -39,5 +39,5 @@ jobs:
         run: |
           while IFS= read -r query_file; do
             echo "Dry running $query_file"
-            bq query --use_legacy_sql=false --dry_run < "$query_file"
+            bq query --use_legacy_sql=false  < "$query_file"
           done < queries.txt
