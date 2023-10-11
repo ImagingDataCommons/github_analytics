@@ -38,6 +38,6 @@ jobs:
       - name: Dry Run SQL Queries
         run: |
           while IFS= read -r query_file; do
-            echo "Dry running $query_file"
+            echo "Running $query_file"
             bq query --use_legacy_sql=false  < "$query_file"
           done < queries.txt
