@@ -22,8 +22,8 @@ REGEXP_EXTRACT(cs_object,r'\/(.*)\.dcm') as extracted_uri
 FROM `idc-admin-001.storage_access_prod.bucket_access_logs`  sap
 
 where #SCANS ONLY FROM THE PREVIOUS DAY
-#((DATE(time)> date(FORMAT_DATE("%Y-%m-%d", DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)))) and (DATE(time)<= date(FORMAT_DATE("%Y-%m-%d", DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY))))) 
-time < '2024-01-18'
+((DATE(time)> date(FORMAT_DATE("%Y-%m-%d", DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)))) and (DATE(time)<= date(FORMAT_DATE("%Y-%m-%d", DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY))))) 
+
 
 and
 cs_object IS NOT NULL AND 
