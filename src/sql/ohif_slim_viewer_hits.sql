@@ -27,7 +27,7 @@ WITH
     httpRequest.status,
     httpRequest.remoteIp,
     httpRequest.referer,
-    tcia_api_collection_id,
+    collection_name,
     StudyInstanceUID,
     submitter_case_id
   FROM
@@ -48,7 +48,7 @@ SELECT
   extracted_url,
   generated_study_url,
   status,
-  tcia_api_collection_id,
+  collection_name,
   StudyInstanceUID,
   submitter_case_id,
   remoteIp,
