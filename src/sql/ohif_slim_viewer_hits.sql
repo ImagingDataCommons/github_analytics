@@ -20,7 +20,7 @@ WITH
     AS viewer_type,
     CASE
       WHEN REGEXP_EXTRACT(httpRequest.requestUrl,r'([a-z]{4,6}[\/])')='slim/' THEN CONCAT('https://viewer.imaging.datacommons.cancer.gov/slim/studies/', REGEXP_EXTRACT(httpRequest.requestUrl, r'([^=a-z\/]+[0-9\.])'))
-      WHEN REGEXP_EXTRACT(httpRequest.requestUrl,r'([a-z]{4,6}[\/])')='viewer/' THEN CONCAT('https://viewer.imaging.datacommons.cancer.gov/viewer/',REGEXP_EXTRACT(httpRequest.requestUrl, r'([^=a-z\/]+[0-9\.])'))
+      WHEN REGEXP_EXTRACT(httpRequest.requestUrl,r'([a-z]{4,6}[\/])')='viewer/' THEN CONCAT('https://viewer.imaging.datacommons.cancer.gov/v3/viewer/?StudyInstanceUIDs=',REGEXP_EXTRACT(httpRequest.requestUrl, r'([^=a-z\/]+[0-9\.])'))
   END
     AS generated_study_url,
     REGEXP_EXTRACT(httpRequest.requestUrl, r'([^=a-z\/]+[0-9\.])') AS extracted_url,
