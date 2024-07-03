@@ -40,6 +40,7 @@ WITH
 
   (_TABLE_SUFFIX =FORMAT_DATE("%Y%m%d", DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY))) and
     ( httpRequest.requestUrl LIKE ('https://viewer.imaging.datacommons.cancer.gov/viewer/%')
+      OR httpRequest.requestUrl LIKE ('https://viewer.imaging.datacommons.cancer.gov/v3/viewer/%')
       OR httpRequest.requestUrl LIKE ('https://viewer.imaging.datacommons.cancer.gov/slim/studies/%') ) )
 SELECT
   rounded_to_minute,
