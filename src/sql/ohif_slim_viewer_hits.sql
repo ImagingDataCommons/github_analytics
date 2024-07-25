@@ -19,6 +19,15 @@ WITH
   END
     AS viewer_type,
     CASE
+    WHEN REGEXP_EXTRACT(httpRequest.requestUrl, r'([a-z]{4,6}[\/])') = 'slim/' THEN 'slim'
+    WHEN REGEXP_EXTRACT(httpRequest.requestUrl, r'([a-z]{4,6}[\/])') = 'viewer/' THEN 
+      CASE
+        WHEN REGEXP_EXTRACT(httpRequest.requestUrl, r'\/v(\d+)\/') IS NOT NULL THEN 
+          CONCAT('ohif', '_v', REGEXP_EXTRACT(httpRequest.requestUrl, r'\/v(\d+)\/'))
+        ELSE 'ohif'
+      END
+  END as viewer_with_version,
+    CASE
       WHEN REGEXP_EXTRACT(httpRequest.requestUrl,r'([a-z]{4,6}[\/])')='slim/' THEN CONCAT('https://viewer.imaging.datacommons.cancer.gov/slim/studies/', REGEXP_EXTRACT(httpRequest.requestUrl, r'([^=a-z\/]+[0-9\.])'))
       WHEN REGEXP_EXTRACT(httpRequest.requestUrl,r'([a-z]{4,6}[\/])')='viewer/' THEN CONCAT('https://viewer.imaging.datacommons.cancer.gov/v3/viewer/?StudyInstanceUIDs=',REGEXP_EXTRACT(httpRequest.requestUrl, r'([^=a-z\/]+[0-9\.])'))
   END
@@ -55,7 +64,8 @@ SELECT
   remoteIp,
   country_name,
   city_name,
-  postal_code
+  postal_code,
+  viewer_with_version,
 FROM (
   SELECT
     *,
